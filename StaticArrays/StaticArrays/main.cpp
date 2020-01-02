@@ -8,6 +8,15 @@ void Print(int *ptr, int size) {
 	}
 }
 
+//creating a function using template
+template<typename T, int size>
+void Print(T(&ref)[size]) {
+	for (int i = 0; i < size; ++i) {
+		std::cout << ref[i] << ' ';
+		//std::cout << *(ptr + i) << ' ';
+	}
+}
+
 int main() {
 	int arr1[5];
 	int arr2[5]{};
@@ -15,11 +24,16 @@ int main() {
 
 	//decomposing array to pointer
 	arr3[0] = 100;
+	//creating reference to array by specifying size of array
+	int(&ref)[5] = arr3;
 
 	int *p = arr3;
 	*(p + 2) = 800;
 	//Print(arr3, sizeof(arr3)/sizeof(int));
 	//undefined behavior if wrong size of array is passed as a parameter to function
-	Print(arr3, 10);
+	//Print(arr3, 10);
+	//passing array by just specifying name of the array
+	Print(arr3);
+
 	return 0;
 }
