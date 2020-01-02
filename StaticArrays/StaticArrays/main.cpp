@@ -40,12 +40,15 @@ int main() {
 
 	//int *p = arr3;
 	//int *end = arr3 + 5;
-	int *p = Begin(arr3);
-	int *end = End(arr3);
+	//int *p = Begin(arr3);
+	//int *end = End(arr3);
+	int *p = std::begin(arr3);
+	int *end = std::end(arr3);
 	//dereferencing the array
 	*(p + 2) = 800;
 	p[2] = 700;
-	std::sort(p, end);
+	//std::sort(p, end);
+	std::sort(std::begin(arr3), std::end(arr3));
 	//Print(arr3, sizeof(arr3)/sizeof(int));
 	//undefined behavior if wrong size of array is passed as a parameter to function
 	//Print(arr3, 10);
