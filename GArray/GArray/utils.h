@@ -6,3 +6,4 @@ DestT Copy(SourceT begin, SourceT end, DestT dest) {
 		*dest = *begin;
 	return dest;
 }
+

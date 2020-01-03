@@ -1,60 +1,74 @@
 #pragma once
 #include <initializer_list>
+#include <iostream>
 #include <cassert>
-#include "utils.h"
 #include <stdexcept>
+#include "utils.h"
 namespace Basic {
-	//this should be able to store any type of data
 	template<typename T>
 	class GArray {
+
 	public:
-		//typedefinations for valuation of T
-		//creating alias
 		using size_type = size_t;
 		using value_type = T;
-		using pointer = T*;
+		using pointer = T * ;
 		using const_pointer = const T*;
-		using reference = T&;
+		using reference = T & ;
 		using const_reference = const T&;
-		//synthesizing default constructor by compiler
 		GArray() = default;
-		//constructor to fill the array with specific value
 		GArray(size_type count, const_reference elem) {
 			m_pBuffer = new T[count];
-			for (int i = 0; i < count; ++i)
+			for (int i = 0; i < count; ++i) {
 				m_pBuffer[i] = elem;
+			}
 			m_Size = count;
 		}
-		//constructor to initialize array with list of elements
 		GArray(std::initializer_list<value_type> list) {
 			m_pBuffer = new T[list.size()];
 			Copy(list.begin(), list.end(), m_pBuffer);
-			m_Size = list_size();
+			m_Size = list.size();
 		}
-		//copy constructor
-		GArray(const GArray &other) {
-
+		GArray(const GArray<T> &other) {
+			std::cout << "GArray copy ctor" << std::endl;
+			m_pBuffer = new value_type[other.m_Size];
+			Copy(other.m_pBuffer, other.m_pBuffer + other.m_Size, m_pBuffer);
+			m_Size = other.m_Size;
 		}
-		//move cosntructor
-		GArray(GArray && other) {
-
+		GArray(GArray<T> && other) {
+			std::cout << "GArray move ctor" << std::endl;
+			m_pBuffer = other.m_pBuffer;
+			m_Size = other.m_Size;
+			other.m_pBuffer = nullptr;
+			other.m_Size = 0;
 		}
-		//copy assignment
-		GArray & operator = (const GArray &other) {
-
+		GArray<T> & operator =(const GArray<T> &other) {
+			std::cout << "GArray copy assignment" << std::endl;
+			if (this != &other) {
+				delete[] m_pBuffer;
+				m_pBuffer = new value_type[other.m_Size];
+				Copy(other.m_pBuffer, other.m_pBuffer + other.m_Size, m_pBuffer);
+				m_Size = other.m_Size;
+			}
+			return *this;
 		}
-		//move assignment
-		GArray & operator = (GArray && other) {
-
+		GArray<T> & operator =(GArray<T> && other) {
+			std::cout << "GArray move assignment" << std::endl;
+			if (this != &other) {
+				delete[] m_pBuffer;
+				m_pBuffer = other.m_pBuffer;
+				m_Size = other.m_Size;
+				other.m_pBuffer = nullptr;
+				other.m_Size = 0;
+			}
+			return *this;
 		}
-		//destructor
 		~GArray() {
 			delete[] m_pBuffer;
 		}
-		//function to add elements to an array
 		void Add(const_reference elem) {
-			if (Empty())
+			if (Empty()) {
 				m_pBuffer = new value_type[1]{ elem };
+			}
 			else {
 				pointer pTemp = new value_type[m_Size + 1];
 				Copy(m_pBuffer, m_pBuffer + m_Size, pTemp);
@@ -64,61 +78,67 @@ namespace Basic {
 			}
 			++m_Size;
 		}
-		//function to insert element inside an array
 		void Insert(size_type index, const_reference elem) {
-			//various checks needs to be performed
-			if (index > m_Size)
+			if (index > m_Size) {
 				throw std::runtime_error{ "Bad index" };
+			}
 			if ((Empty() && index == 0) || index == m_Size) {
 				Add(elem);
 				return;
 			}
-			//if the above conditions are not true then we are inserting the element in the middle
 			pointer pTemp = new value_type[m_Size + 1];
 			Copy(m_pBuffer, m_pBuffer + index, pTemp);
 			pTemp[index] = elem;
 			Copy(m_pBuffer + index, m_pBuffer + m_Size, pTemp + index + 1);
-			delete[]m_pBuffer;
-			m_pBuffer = pTemp;
-			++mSize;
-		}
-		//function to erase an element inside an array
-		void Erase(size_type index) {
 
+			delete[] m_pBuffer;
+			m_pBuffer = pTemp;
+			++m_Size;
 		}
-		//function access limits of array
-		const_reference Back() const {
+		void Erase(size_type index) {
+			if (Empty() || index >= m_Size) {
+				throw std::runtime_error{ "Bad index" };
+			}
+			//1,2,3,4,5
+			//1,3,4,5
+			size_type i = index;
+			if (index != (m_Size - 1)) {
+				do {
+					m_pBuffer[i] = m_pBuffer[i + 1];
+					++i;
+				} while (i < (m_Size - 1));
+			}
+			--m_Size;
+		}
+		const_reference Back()const {
 			assert(!Empty());
 			return m_pBuffer[m_Size];
 		}
-		const_reference Front() const {
+		const_reference Front()const {
 			assert(!Empty());
 			return m_pBuffer[0];
 		}
-		//support for subscript operator
 		const_reference operator[](size_type index)const {
 			assert(!Empty());
 			return m_pBuffer[index];
 		}
-		//overload for this operator
 		reference operator[](size_type index) {
 			assert(!Empty());
 			return m_pBuffer[index];
 		}
-		//access the elements to index; this will check for bounds; wrong arguments passed will throw an exception
-		const_reference GetAt[](size_type index)const {
+		const_reference GetAt(size_type index)const {
 			if (index > m_Size) {
-				throw std::runtime_error{"Bad index"};
+				throw std::runtime_error{ "Bad index" };
 			}
 			return m_pBuffer[index];
+
 		}
-		reference GetAt[](size_type index) {
+		reference GetAt(size_type index) {
 			if (index > m_Size) {
 				throw std::runtime_error{ "Bad index" };
 			}
 			return m_pBuffer[index];
 		}
-		//finding if array is empty
 		bool Empty()const {
 			return m_Size == 0;
 		}
@@ -135,7 +155,6 @@ namespace Basic {
 			}
 			return -1;
 		}
-		//to make array compatible with c
 		pointer GetRawPointer() {
 			assert(!Empty());
 			return m_pBuffer;
@@ -144,9 +163,9 @@ namespace Basic {
 			assert(!Empty());
 			return m_pBuffer;
 		}
+
 	private:
-		//attributes of the class is pointer that would point to the dynamic array on the heap
-		pointer *m_pBuffer{};
+		pointer m_pBuffer{};
 		size_type m_Size{};
 	};
 }
