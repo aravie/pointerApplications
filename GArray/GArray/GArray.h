@@ -53,11 +53,34 @@ namespace Basic {
 		}
 		//function to add elements to an array
 		void Add(const_reference elem) {
-
+			if (Empty())
+				m_pBuffer = new value_type[1]{ elem };
+			else {
+				pointer pTemp = new value_type[m_Size + 1];
+				Copy(m_pBuffer, m_pBuffer + m_Size, pTemp);
+				pTemp[m_Size] = elem;
+				delete[] m_pBuffer;
+				m_pBuffer = pTemp;
+			}
+			++m_Size;
 		}
 		//function to insert element inside an array
 		void Insert(size_type index, const_reference elem) {
-
+			//various checks needs to be performed
+			if (index > m_Size)
+				throw std::runtime_error{ "Bad index" };
+			if ((Empty() && index == 0) || index == m_Size) {
+				Add(elem);
+				return;
+			}
+			//if the above conditions are not true then we are inserting the element in the middle
+			pointer pTemp = new value_type[m_Size + 1];
+			Copy(m_pBuffer, m_pBuffer + index, pTemp);
+			pTemp[index] = elem;
+			Copy(m_pBuffer + index, m_pBuffer + m_Size, pTemp + index + 1);
+			delete[]m_pBuffer;
+			m_pBuffer = pTemp;
+			++mSize;
 		}
 		//function to erase an element inside an array
 		void Erase(size_type index) {
